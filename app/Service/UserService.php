@@ -3,12 +3,11 @@
 namespace ProgrammerZamanNow\Belajar\PHP\MVC\Service;
 
 use ProgrammerZamanNow\Belajar\PHP\MVC\Config\Database;
+use ProgrammerZamanNow\Belajar\PHP\MVC\Domain\User;
 use ProgrammerZamanNow\Belajar\PHP\MVC\Model\UserRegisterRequest;
 use ProgrammerZamanNow\Belajar\PHP\MVC\Model\UserRegisterResponse;
 use ProgrammerZamanNow\Belajar\PHP\MVC\Repository\UserRepository;
 use ProgrammerZamanNow\Belajar\PHP\MVC\Exception\ValidationException;
-use ProgrammerZamanNow\Belajar\PHP\MVC\Domain\User;
-
 
 
 class UserService {

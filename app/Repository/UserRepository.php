@@ -19,7 +19,7 @@ class UserRepository {
         return $user;
     }
 
-    public function findById(string $id): User {
+    public function findById(string $id): ?User {
         $statement = $this->connection->prepare("SELECT name, id, password FROM user WHERE id = ?");
         $statement->execute([$id]);
 
