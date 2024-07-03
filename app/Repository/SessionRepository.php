@@ -40,7 +40,8 @@ class SessionRepository {
     }
     
     public function deleteAll():void {
-        $this->connection->exec("DELETE FROM sessions");
+        $statement = $this->connection->prepare("DELETE FROM sessions");
+        $statement->execute();
     }
 
 }

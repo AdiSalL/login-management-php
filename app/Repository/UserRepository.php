@@ -41,5 +41,6 @@ class UserRepository {
 
     public function deleteAll():void {
         $statement = $this->connection->prepare("DELETE FROM user");
+        $statement->execute();
     }
 }

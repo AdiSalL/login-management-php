@@ -6,15 +6,29 @@ namespace ProgrammerZamanNow\Belajar\PHP\MVC\Repository;
 use PHPUnit\Framework\TestCase;
 use ProgrammerZamanNow\Belajar\PHP\MVC\Config\Database;
 use ProgrammerZamanNow\Belajar\PHP\MVC\Repository\SessionRepository;
+use ProgrammerZamanNow\Belajar\PHP\MVC\Repository\UserRepository;
 use ProgrammerZamanNow\Belajar\PHP\MVC\Domain\Session;
+use ProgrammerZamanNow\Belajar\PHP\MVC\Domain\User;
 
 
 class SessionRepositoryTest extends TestCase {
     private SessionRepository $sessionRepository;
+    private UserRepository $userRepository;
 
     public function setUp():void {
+        $this->userRepository = new UserRepository(Database::getConnection());
         $this->sessionRepository = new SessionRepository(Database::getConnection());
+
         $this->sessionRepository->deleteAll();
+        $this->userRepository->deleteAll();
+
+
+        $user = new User();
+        $user->id = "adi";
+        $user->name = "adi";
+        $user->password = "rahasia";
+        
+        $this->userRepository->save($user);
     }
 
     public function testSaveSuccess() {
