@@ -6,12 +6,21 @@ namespace ProgrammerZamanNow\Belajar\PHP\MVC\App {
     }
 }
 
+namespace ProgrammerZamanNow\Belajar\PHP\MVC\Service {
+    function setcookie(string $name, string $value) {
+        echo "[$name : $value]";
+    }
+}
+
 namespace ProgrammerZamanNow\Belajar\MVC\Controller {
     
 use ProgrammerZamanNow\Belajar\PHP\MVC\Domain\User;
 use ProgrammerZamanNow\Belajar\PHP\MVC\Controller\UserController;
 use ProgrammerZamanNow\Belajar\PHP\MVC\Config\Database;
 use ProgrammerZamanNow\Belajar\PHP\MVC\Repository\UserRepository;
+use ProgrammerZamanNow\Belajar\PHP\MVC\Repository\SessionRepository;
+use ProgrammerZamanNow\Belajar\PHP\MVC\Service\SessionService;
+use ProgrammerZamanNow\Belajar\PHP\MVC\Domain\Session;
 
 
 use PHPUnit\Framework\TestCase;
@@ -19,9 +28,14 @@ use PHPUnit\Framework\TestCase;
 class UserControllerTest extends TestCase {
     private UserController $userController;
     private UserRepository $userRepository;
-
+    private SessionRepository $sessionRepository;
+    
     public function setUp():void {
         $this->userController = new UserController();
+
+        $this->sessionRepository = new SessionRepository(Database::getConnection());
+        $this->sessionRepository->deleteAll();
+
         $this->userRepository = new UserRepository(Database::getConnection());
         $this->userRepository->deleteAll();
 
@@ -104,6 +118,8 @@ class UserControllerTest extends TestCase {
         
         $this->userController->postLogin();
         $this->expectOutputRegex("[Location: /]");
+
+        
         // $this->assertSame(password_verify($this->user->password, $this->userRepository->password));
     }
 
@@ -149,6 +165,28 @@ class UserControllerTest extends TestCase {
         $this->expectOutputRegex("[Password]");
         $this->expectOutputRegex("[Id Or Password Is Wrong]");    
 
+    }
+
+    public function testLogout() {
+
+        $user = new User();
+        $user->id = "adi";
+        $user->name = "adi";
+        $user->password = password_hash("adi", PASSWORD_BCRYPT);
+
+        $this->userRepository->save($user);
+        $session = new Session();
+        $session->id =  uniqid();
+        $session->userId = $user->id;
+        $this->sessionRepository->save($session);
+        
+        $_COOKIE[SessionService::$COOKIE_NAME] = $session->id;
+
+        $this->userController->logout();
+
+        $this->expectOutputRegex("[Location: /]");
+        $this->expectOutputRegex("[X-PZN-SESSION: ]");
+        
     }
 
 }
