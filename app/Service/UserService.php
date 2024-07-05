@@ -10,6 +10,8 @@ use ProgrammerZamanNow\Belajar\PHP\MVC\Repository\UserRepository;
 use ProgrammerZamanNow\Belajar\PHP\MVC\Exception\ValidationException;
 use ProgrammerZamanNow\Belajar\PHP\MVC\Model\UserLoginRequest;
 use ProgrammerZamanNow\Belajar\PHP\MVC\Model\UserLoginResponse;
+use ProgrammerZamanNow\Belajar\PHP\MVC\Model\UserProfileUpdateRequest;
+use ProgrammerZamanNow\Belajar\PHP\MVC\Model\UserProfileUpdateResponse;
 
 
 class UserService {
@@ -78,4 +80,36 @@ class UserService {
             throw new ValidationException("Id, Password Can't Be Blank");
         }
     }
+
+    public function updateProfile(UserProfileUpdateRequest $request):UserProfileUpdateResponse {
+        $this->validateUserProfileUpdateRequest($request);
+
+        try {
+            Database::beginTransaction();
+            $user = $this->userRepository->findById($request->id);
+            if($user == null) {
+                throw new ValidationException("User Is Not Found");
+            }
+            $user->name = $request->name;
+            $this->userRepository->update($user);
+
+            Database::commitTransaction();
+            $response = new UserProfileUpdateResponse();
+            $response->user = $user;
+            return $response;
+
+        }catch(\Exception $exception) {
+            Database::rollbackTransaction();
+            throw $exception;
+        }
+    }
+
+    private function validateUserProfileUpdateRequest(UserProfileUpdateRequest $request) {
+        if($request->id == null ||  $request->name == null || trim($request->id == "") ||  trim($request->name == "") ) 
+        {
+            throw new ValidationException("Id, Name Can't Be Blank");
+        }
+    }
+
+    public function updatePassword(){}
 }

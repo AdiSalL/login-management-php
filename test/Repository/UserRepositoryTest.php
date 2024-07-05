@@ -9,6 +9,7 @@ use PHPUnit\Framework\TestCase;
 
 class UserRepositoryTest extends TestCase {
     private UserRepository $userRepository;
+    
 
     protected function setUp():void {
         $this->userRepository = new UserRepository(Database::getConnection());
@@ -35,5 +36,25 @@ class UserRepositoryTest extends TestCase {
         self::assertNull($result);
     }
 
+    public function testUpdate() {
+        $user = new User();
+        $user->id = "udin";
+        $user->name = "Udin";
+        $user->password = "rahasia";
+
+        $this->userRepository->save($user);
+
+        $user->name = "Budi";
+
+        
+        $this->userRepository->update($user);
+        $result = $this->userRepository->findById($user->id);
+        self::assertEquals($user->id, $result->id);
+        self::assertEquals($user->name, $result->name);
+        self::assertEquals($user->password, $result->password);
+        echo $user->name . "=" . $result->name;
+
+
+    }
 
 }

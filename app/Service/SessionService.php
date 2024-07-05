@@ -38,7 +38,7 @@ class SessionService {
             $sessionId = $_COOKIE[self::$COOKIE_NAME] ?? "";
             $this->sessionRepository->deleteById($sessionId);
 
-            setcookie(self::$COOKIE_NAME, $session->id, 1 , "/");
+            setcookie(self::$COOKIE_NAME,"", 1 , "/");
             
     }
 
