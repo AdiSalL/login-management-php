@@ -12,6 +12,9 @@ use ProgrammerZamanNow\Belajar\PHP\MVC\Model\UserLoginRequest;
 use ProgrammerZamanNow\Belajar\PHP\MVC\Model\UserLoginResponse;
 use ProgrammerZamanNow\Belajar\PHP\MVC\Model\UserProfileUpdateRequest;
 use ProgrammerZamanNow\Belajar\PHP\MVC\Model\UserProfileUpdateResponse;
+use ProgrammerZamanNow\Belajar\PHP\MVC\Model\UserPasswordUpdateRequest;
+use ProgrammerZamanNow\Belajar\PHP\MVC\Model\UserPasswordUpdateResponse;
+
 
 
 class UserService {
@@ -111,5 +114,41 @@ class UserService {
         }
     }
 
-    public function updatePassword(){}
+    public function updatePassword(UserPasswordUpdateRequest $request): UserPasswordUpdateResponse{
+        $this->validateUserPasswordUpdateRequest($request);
+        try {
+            Database::beginTransaction();
+            $user = $this->userRepository->findById($request->id);
+            if($user == null) {
+                throw new ValidationException("User in not found");
+            }
+
+            if(!password_verify($request->oldPassword, $user->password)){
+                throw new ValidationException("Old Password Is Wrong");
+            }
+
+            if(password_verify($request->newPassword, $user->password)){
+                throw new ValidationException("Old And New Password Cant Be Same");
+            }
+
+            $user->password = password_hash($request->newPassword, PASSWORD_BCRYPT);
+            $this->userRepository->update($user);
+            Database::commitTransaction();
+            $response = new UserPasswordUpdateResponse();
+            $response->user = $user;
+            return $response;
+
+        }catch(\Exception $exception) {
+            Database::rollbackTransaction();
+            throw $exception;
+        }
+    
+    }
+
+    private function validateUserPasswordUpdateRequest(UserPasswordUpdateRequest $request) {
+        if($request->id == null ||  $request->oldPassword == null ||  $request->oldPassword == null) 
+        {
+            throw new ValidationException("Id, Old Password, New Password Can't Be Blank");
+        }
+    }
 }

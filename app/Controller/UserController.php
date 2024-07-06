@@ -12,7 +12,7 @@ use ProgrammerZamanNow\Belajar\PHP\MVC\Exception\ValidationException;
 use ProgrammerZamanNow\Belajar\PHP\MVC\Model\UserLoginRequest;
 use  ProgrammerZamanNow\Belajar\PHP\MVC\Model\UserLoginResponse;
 use ProgrammerZamanNow\Belajar\PHP\MVC\Model\UserProfileUpdateRequest;
-use ProgrammerZamanNow\Belajar\PHP\MVC\Model\UserProfileUpdateResponse;
+use ProgrammerZamanNow\Belajar\PHP\MVC\Model\UserPasswordUpdateRequest;
 
 
 
@@ -115,5 +115,37 @@ class UserController {
             ]);
         }
 
+    }
+
+    public function updatePassword() {
+        $user = $this->sessionService->current();
+        View::render("User/password", [
+            "title" => "Update User Password",
+            "user" => [
+                "id" => $user->id,
+            ],
+        ]);
+    }
+
+    public function postUpdatePassword() {
+        $user = $this->sessionService->current();
+        $request = new UserPasswordUpdateRequest();
+        $request->id = $user->id;
+        $request->oldPassword = $_POST["oldPassword"];
+        $request->newPassword = $_POST["newPassword"];
+        
+        
+        try {
+            $this->userService->updatePassword($request);
+            View::redirect("/");
+        }catch(ValidationException $exception) {
+            View::render("User/password", [
+                "title" => "Update User Password",
+                "user" => [
+                    "id" => $user->id,
+                ],
+                "error" => $exception->getMessage(),
+            ]);
+        }
     }
 }

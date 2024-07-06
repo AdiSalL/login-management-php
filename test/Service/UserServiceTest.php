@@ -13,6 +13,8 @@ use ProgrammerZamanNow\Belajar\PHP\MVC\Exception\ValidationException;
 use ProgrammerZamanNow\Belajar\PHP\MVC\Model\UserLoginRequest;
 use ProgrammerZamanNow\Belajar\PHP\MVC\Model\UserProfileUpdateRequest;
 use ProgrammerZamanNow\Belajar\PHP\MVC\Model\UserProfileUpdateResponse;
+use ProgrammerZamanNow\Belajar\PHP\MVC\Model\UserPasswordUpdateRequest;
+use ProgrammerZamanNow\Belajar\PHP\MVC\Model\UserPasswordUpdateResponse;
 
 class UserServiceTest extends TestCase {
     private UserService $userService;
@@ -117,13 +119,13 @@ class UserServiceTest extends TestCase {
 
     public function testUpdateSuccess(){
         $user = new User();
-        $user->id = "madang";
-        $user->name = "madang";
-        $user->password = password_hash("madang", PASSWORD_BCRYPT);
+        $user->id = "adi";
+        $user->name = "adi";
+        $user->password = password_hash("adi", PASSWORD_BCRYPT);
         $this->userRepository->save($user);
 
         $request = new UserProfileUpdateRequest();
-        $request->id = "madang";
+        $request->id = "adi";
         $request->name = "Ida";
 
         $this->userService->updateProfile($request);
@@ -152,6 +154,85 @@ class UserServiceTest extends TestCase {
 
         $this->userService->updateProfile($request);
 
+
+    }
+
+    public function testUpdatePasswordSuccess() {
+        $user = new User();
+        $user->id = "adi";
+        $user->name = "adi";
+        $user->password = password_hash("adi", PASSWORD_BCRYPT);
+        $this->userRepository->save($user);
+
+        $request = new UserPasswordUpdateRequest();
+        $request->id = $user->id;
+        $request->oldPassword = $user->password;
+        $request->newPassword = "admin";
+
+        $this->userService->updatePassword($request);
+
+        $result = $this->userRepository->findById($user->id);
+        self::assertTrue(password_verify( $request->newPassword, $result->password));
+
+    }
+
+    public function testUpdatePasswordValidationError() {
+        $this->expectException(ValidationException::class);
+        $request = new UserPasswordUpdateRequest();
+        $request->id = "adi";
+        $request->oldPassword = "";
+        $request->newPassword = "";
+
+        $this->userService->updatePassword($request);
+    }
+
+    public function testUpdatePasswordWrongOldPassword() {
+        $this->expectException(ValidationException::class);
+        $user = new User();
+        $user->id = "adi";
+        $user->name = "adi";
+        $user->password = password_hash("adi", PASSWORD_BCRYPT);
+        $this->userRepository->save($user);
+
+        $request = new UserPasswordUpdateRequest();
+        $request->id = $user->id;
+        $request->oldPassword = "sahahduihoaw";
+        $request->newPassword = "admin";
+
+        $this->userService->updatePassword($request);
+
+    }
+
+    public function testUpdatePasswordNotFound() {
+        $this->expectException(ValidationException::class);
+    
+
+        $request = new UserPasswordUpdateRequest();
+        $request->id = "adi";
+        $request->oldPassword = "sahahduihoaw";
+        $request->newPassword = "admin";
+
+        $this->userService->updatePassword($request);
+    }
+
+    public function testUpdatePasswordSame() {
+        $this->expectException(ValidationException::class);
+
+        $user = new User();
+        $user->id = "adi";
+        $user->name = "adi";
+        $user->password = password_hash("adi", PASSWORD_BCRYPT);
+        $this->userRepository->save($user);
+
+        $request = new UserPasswordUpdateRequest();
+        $request->id = $user->id;
+        $request->oldPassword = $user->password;
+        $request->newPassword =  $user->password;
+
+        $this->userService->updatePassword($request);
+
+        $result = $this->userRepository->findById($user->id);
+        self::assertTrue(password_verify( $request->newPassword, $request->oldPassword));
 
     }
 }
